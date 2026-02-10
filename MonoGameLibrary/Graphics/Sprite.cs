@@ -22,6 +22,16 @@ public class Sprite
         Region = region;
     }
 
+
+    public void ShowOriginDebug(bool status = true, Color? color = null)
+    {
+        Region.ShowOriginDebug = status;
+        if (color != null)
+        {
+            Region.OriginDebugColor = color.Value;
+        }
+    }
+
     public void CenterOrigin()
     {
         Origin = new Vector2(Region.Width, Region.Height) * 0.5f;

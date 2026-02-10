@@ -25,7 +25,7 @@ public readonly struct Circle : IEquatable<Circle>
     /// <summary>
     /// Gets the location if the center of this circle.
     /// </summary>
-    public readonly Point Location => new Point(X, Y);
+    public readonly Point Location => new(X, Y);
 
     /// <summary>
     /// Gets a circe with X=0, Y=0, and Radius=0.
@@ -92,8 +92,8 @@ public readonly struct Circle : IEquatable<Circle>
 
     public bool Intersects(Circle other)
     {
-        int radiiSquared = (this.Radius + other.Radius) * (this.Radius + other.Radius);
-        float distanceSquared = Vector2.DistanceSquared(this.Location.ToVector2(), other.Location.ToVector2());
+        int radiiSquared = (Radius + other.Radius) * (Radius + other.Radius);
+        float distanceSquared = Vector2.DistanceSquared(Location.ToVector2(), other.Location.ToVector2());
         return distanceSquared < radiiSquared;
     }
     /// <summary>

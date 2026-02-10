@@ -15,6 +15,11 @@ public class TextureRegion
     public int Width => SourceRectangle.Width;
     public int Height => SourceRectangle.Height;
 
+    public bool ShowOriginDebug {get; set;} = false;
+    public Color OriginDebugColor {get; set;} = Color.White;
+
+    private Texture2D _pixel;
+
     public TextureRegion(){}
 
     public TextureRegion(Texture2D texture, int x, int y, int width, int height)
@@ -55,7 +60,44 @@ public class TextureRegion
             effects,
             layerDepth
         );
-    }
 
+        if (ShowOriginDebug)
+        {
+            DrawOriginDebug(spriteBatch, position, origin, scale);
+        }
+    }
+    //  spriteBatch.Draw(_pixel, new Rectangle(0, y, width, LineThickness), Color);
+    private void DrawOriginDebug(SpriteBatch spriteBatch, Vector2 position, Vector2 origin, Vector2 scale)
+    {
+        Vector2 scaleOrigin = origin * scale;
+        Vector2 actualOriginPosition = position - scaleOrigin;
+        _pixel = new Texture2D(Core.GraphicsDevice , 1, 1);
+        _pixel.SetData([Color.White]);
+
+        int lineLength = 15;
+        spriteBatch.Draw(
+            _pixel,
+            new Vector2(actualOriginPosition.X - lineLength, actualOriginPosition.Y),
+            null,
+            OriginDebugColor,
+            0.0f,
+            Vector2.Zero,
+            new Vector2(lineLength * 2, 2),
+            SpriteEffects.None,
+            0.0f
+        );
+
+        spriteBatch.Draw(
+            _pixel,
+            new Vector2(actualOriginPosition.X, actualOriginPosition.Y- lineLength),
+            null,
+            OriginDebugColor,
+            0.0f,
+            Vector2.Zero,
+            new Vector2(2, lineLength * 2),
+            SpriteEffects.None,
+            0.0f
+        );
+    }
 
 }

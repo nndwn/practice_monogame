@@ -9,6 +9,7 @@ using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Input;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
+using MonoGameLibrary.Test;
 
 
 
@@ -32,6 +33,16 @@ public class Game1 : Core
     private SoundEffect _bounceSoundEffect;
     private SoundEffect _collectSoundEffect;
 
+    private Song _themeSong;
+
+    private  SpriteFont _font;
+
+    private int _score;
+
+    private Vector2 _scoreTextPosition;
+
+    private Vector2 _scoreTextOrigin;
+
     
 
     public Game1() : base("Dungeon Slime", 1280, 720, false)
@@ -44,10 +55,11 @@ public class Game1 : Core
         base.Initialize();
         _batPosition = new Vector2(_slime.Width + 10, 0);
         
-        // Configure and show the debug grid overlay.
-        DebugGrid.Visible = true;
-        DebugGrid.CellSize = 50;  
-        DebugGrid.Color = Color.Red * 0.5f;
+     
+        _bat.ShowOriginDebug();
+
+        DebugVisual.Instance.grid.Visible = true;
+
 
         Rectangle screenBounds = GraphicsDevice.PresentationParameters.Bounds;
 
@@ -64,6 +76,12 @@ public class Game1 : Core
 
         _batPosition = new Vector2(_roomBounds.Left, _roomBounds.Top);
         AssignRandomBatVelocity();
+        Audio.PlaySong(_themeSong);
+
+        _scoreTextPosition = new Vector2(_roomBounds.Left, _tilemap.TileHeight * 0.5f);
+        float scoreTextYOrigin = _font.MeasureString("Score").Y * 0.5f;
+        _scoreTextOrigin = new Vector2(0, scoreTextYOrigin);
+
     }
 
     protected override void LoadContent()
@@ -85,15 +103,9 @@ public class Game1 : Core
         _bounceSoundEffect = Content.Load<SoundEffect>("audio/bounce");
         _collectSoundEffect = Content.Load<SoundEffect>("audio/collect");
 
-        Song theme = Content.Load<Song>("audio/theme");
-        if (MediaPlayer.State == MediaState.Playing)
-        {
-            MediaPlayer.Stop();
-        }
-
-        MediaPlayer.Play(theme);
-        MediaPlayer.IsRepeating = true;
-
+  
+        _themeSong = Content.Load<Song>("audio/theme");
+        _font = Content.Load<SpriteFont>("fonts/04B_30");
     }
 
     protected override void Update(GameTime gameTime)
@@ -174,7 +186,7 @@ public class Game1 : Core
             normal.Normalize();
             _batVelocity = Vector2.Reflect(_batVelocity, normal);
 
-            _bounceSoundEffect.Play();
+             Audio.PlaySoundEffect(_bounceSoundEffect);
         }
 
         _batPosition = newBatPosition;
@@ -188,7 +200,8 @@ public class Game1 : Core
             _batPosition = new Vector2(column * _bat.Width, row * _bat.Height);
 
             AssignRandomBatVelocity();
-            _collectSoundEffect.Play();
+            Audio.PlaySoundEffect(_collectSoundEffect);
+            _score +=  100;
         }
 
 
@@ -229,6 +242,24 @@ public class Game1 : Core
         if (Input.Keyboard.IsKeyDown(Keys.D) || Input.Keyboard.IsKeyDown(Keys.Right))
         {
             _slimePosition.X += speed;
+        }
+              if (Input.Keyboard.WasKeyJustPressed(Keys.M))
+        {
+            Audio.ToggleMute();
+        }
+
+        // If the + button is pressed, increase the volume.
+        if (Input.Keyboard.WasKeyJustPressed(Keys.OemPlus))
+        {
+            Audio.SongVolume += 0.1f;
+            Audio.SoundEffectVolume += 0.1f;
+        }
+
+        // If the - button was pressed, decrease the volume.
+        if (Input.Keyboard.WasKeyJustPressed(Keys.OemMinus))
+        {
+            Audio.SongVolume -= 0.1f;
+            Audio.SoundEffectVolume -= 0.1f;
         }
     }
     private void CheckGamePadInput()
@@ -278,9 +309,23 @@ public class Game1 : Core
 
         _tilemap.Draw(SpriteBatch);
 
+        Grid.Draw();
+
         _slime.Draw(SpriteBatch, _slimePosition);
         _bat.Draw(SpriteBatch, _batPosition);
 
+        SpriteBatch.DrawString(
+            _font,
+            $"Score: {_score}",
+            _scoreTextPosition,
+            Color.White,
+            0.0f,
+            _scoreTextOrigin,
+            1.0f,
+            SpriteEffects.None,
+            0.0f
+        );
+        
         SpriteBatch.End();
         base.Draw(gameTime);
 

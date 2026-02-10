@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary.Input;
 using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Audio;
+using MonoGameLibrary.Test;
 
 namespace MonoGameLibrary;
 public class Core : Game
@@ -40,10 +41,9 @@ public class Core : Game
     public static InputManager Input { get; private set; }
     public static bool ExitOnEscape { get; set; }
 
-    /// <summary>
-    /// Global debug grid overlay that can be configured per-scene.
-    /// </summary>
-    public Grid DebugGrid { get; private set; }
+    public DebugVisual Visual {get; private set;}
+
+    public Grid Grid {get; private set;}
 
     public static AudioContoller Audio {get; private set;}
     
@@ -86,12 +86,12 @@ public class Core : Game
 
         // Set the root directory for content.
         Content.RootDirectory = "Content";
-
-        DebugGrid = new Grid();
-        
+ 
         // Mouse is visible by default.
         IsMouseVisible = true;
         ExitOnEscape = true;
+
+        Visual = DebugVisual.Instance;
     }
 
     protected override void Initialize()
@@ -105,9 +105,9 @@ public class Core : Game
         // Create the sprite batch instance.
         SpriteBatch = new SpriteBatch(GraphicsDevice);
         Input = new InputManager();
+        
 
-        // Create and initialize the global debug grid overlay (hidden by default)
-        DebugGrid.Initialize();
+        Grid = new Grid(GraphicsDevice, SpriteBatch, Visual);
 
         Audio = new AudioContoller();
 
@@ -133,19 +133,4 @@ public class Core : Game
 
         base.Update(gameTime);
     }
-
-    protected override void Draw(GameTime gameTime)
-    {
-        // Draw global debug overlays after scenes draw.
-        if (DebugGrid != null && DebugGrid.Visible)
-        {
-            SpriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.AlphaBlend);
-            DebugGrid.Draw(SpriteBatch);
-            SpriteBatch.End();
-        }
-
-        base.Draw(gameTime);
-    }
-
-
 }
