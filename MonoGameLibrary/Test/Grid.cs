@@ -12,7 +12,7 @@ public class Grid
 
     private readonly GraphicsDevice _graphicsDevice;
 
-    private DebugVisual _grid;
+    private readonly DebugVisual _grid;
 
     public Grid(GraphicsDevice graphicsDevice , SpriteBatch spriteBatch , DebugVisual debugVisual )
     {
@@ -25,7 +25,6 @@ public class Grid
 
     public void Draw()
     {
-        Console.WriteLine(_grid.grid.Visible);
         if (!_grid.grid.Visible) return;
 
         int width = _graphicsDevice.PresentationParameters.BackBufferWidth;

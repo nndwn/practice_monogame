@@ -4,41 +4,31 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary.Input;
-using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Audio;
 using MonoGameLibrary.Test;
+using MonoGameLibrary.Scenes;
 
 namespace MonoGameLibrary;
 public class Core : Game
 {
     internal static Core s_instance;
 
-    /// <summary>
-    /// Gets a reference to the Core instance.
-    /// </summary>
     public static Core Instance => s_instance;
 
-    /// <summary>
-    /// Gets the graphics device manager to control the presentation of graphics.
-    /// </summary>
+    private static Scene s_activeScene;
+
+    private static Scene s_nextScene;
+
     public static GraphicsDeviceManager Graphics {get; private set; }
 
-    /// <summary>
-    /// Gets the graphics device used to create graphical resources and perform primitive rendering.
-    /// </summary>
     public static new GraphicsDevice GraphicsDevice {get ; private set;}
 
-    /// <summary>
-    /// Gets the sprite batch used for all 2D rendering.
-    /// </summary>
     public static SpriteBatch SpriteBatch {get; private set; }
 
-    /// <summary>
-    /// Gets the content manager used to load global assets.
-    /// </summary>
     public static new ContentManager Content {get; private set;}
 
     public static InputManager Input { get; private set; }
+
     public static bool ExitOnEscape { get; set; }
 
     public DebugVisual Visual {get; private set;}
@@ -47,13 +37,6 @@ public class Core : Game
 
     public static AudioContoller Audio {get; private set;}
     
-    /// <summary>
-    /// Creates a new Core instance.
-    /// </summary>
-    /// <param name="title">The title to display in the title bar of the game window.</param>
-    /// <param name="width">The initial width, in pixels, of the game window.</param>
-    /// <param name="height">The initial height, in pixels, of the game window.</param>
-    /// <param name="fullScreen">Indicates if the game should start in fullscreen mode.</param>
     public Core(string title, int width, int height, bool fullScreen)
     {
         // Ensure that multiple cores are not created.
@@ -105,10 +88,7 @@ public class Core : Game
         // Create the sprite batch instance.
         SpriteBatch = new SpriteBatch(GraphicsDevice);
         Input = new InputManager();
-        
-
         Grid = new Grid(GraphicsDevice, SpriteBatch, Visual);
-
         Audio = new AudioContoller();
 
     }
@@ -131,6 +111,51 @@ public class Core : Game
             Exit();
         }
 
+        if (s_nextScene != null)
+        {
+            TransitionScene();
+        }
+
+        if (s_activeScene != null)
+        {
+            s_activeScene.Update(gameTime);
+        }
+
         base.Update(gameTime);
+    }
+
+    protected override void Draw (GameTime gameTime)
+    {
+        if (s_activeScene != null)
+        {
+            s_activeScene.Draw(gameTime);
+        }
+        base.Draw(gameTime);
+    }
+
+    public static void ChangeScene(Scene next)
+    {
+        if (s_activeScene != next)
+        {
+            s_nextScene = next;
+        }
+    }
+
+    private static void TransitionScene()
+    {
+        if (s_activeScene != null)
+        {
+            s_activeScene.Dispose();
+        }
+
+        GC.Collect();
+        s_activeScene = s_nextScene;
+
+        s_nextScene = null;
+
+        if (s_activeScene != null)
+        {
+            s_activeScene.Initialize();
+        }
     }
 }
