@@ -9,9 +9,19 @@ namespace MonoGameLibrary.Graphics;
 
 public class TextureRegion
 {
+
+   
     public Texture2D Texture { get; set; }
     public Rectangle SourceRectangle { get; set; }
 
+    public float TopTextureCoordinate => SourceRectangle.Top / (float)Texture.Height;
+
+    public float BottomTextureCoordinate => SourceRectangle.Bottom / (float)Texture.Height;
+
+    public float LeftTextureCoordinate => SourceRectangle.Left / (float)Texture.Width;
+
+    public float RightTextureCoordinate => SourceRectangle.Right / (float)Texture.Width;
+    
     public int Width => SourceRectangle.Width;
     public int Height => SourceRectangle.Height;
 

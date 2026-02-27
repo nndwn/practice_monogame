@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
 using MonoGameLibrary.Scenes;
+using DungeonSlime.UI;
+using MonoGameLibrary.Graphics;
 
 namespace DungeonSlime.Scenes;
 
@@ -26,11 +28,6 @@ public class TitleScene : Scene
 
     private Vector2 _slimeTextPos;
     private Vector2 _slimeTextOrigin;
-
-    private Vector2 _pressEnterPos;
-
-    private Vector2 _pressEnterOrigin;
-
     private Texture2D _backgroundPattern;
     private Rectangle _backgroundDestination;
 
@@ -40,8 +37,10 @@ public class TitleScene : Scene
     private SoundEffect _uiSoundEffect;
     private Panel _titleScreenButtonsPanel;
     private Panel _optionsPanel;
-    private Button _optionsButton;
-    private Button _optionsBackButton;
+    private AnimatedButton _optionsButton;
+    private AnimatedButton _optionsBackButton;
+   
+    private TextureAtlas _atlas;
 
     public override void Initialize()
     {
@@ -56,8 +55,6 @@ public class TitleScene : Scene
         _slimeTextOrigin = size * 0.5f;
 
         size = _font.MeasureString(PRESS_ENTER_TEXT);
-        _pressEnterPos = new Vector2(640, 620);
-        _pressEnterOrigin = size * 0.5f;
 
         _backgroundOffset = Vector2.Zero;
         _backgroundDestination = Core.GraphicsDevice.PresentationParameters.Bounds;
@@ -74,6 +71,7 @@ public class TitleScene : Scene
 
         _backgroundPattern = Content.Load<Texture2D>("images/background-pattern");
         _uiSoundEffect = Core.Content.Load<SoundEffect>("audio/ui");
+        _atlas = TextureAtlas.FromFile(Core.Content, "images/atlas-definition.xml");
 
     }
 
@@ -121,7 +119,8 @@ public class TitleScene : Scene
             Core.SpriteBatch.DrawString(_font5x, DUNGEON_TEXT, _dungeonTextPos, Color.White, 0.0f, _dungeonTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
 
             Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos + new Vector2(10, 10), dropShadowColor, 0.0f, _slimeTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
-        Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos, Color.White, 0.0f, _slimeTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
+            
+            Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos, Color.White, 0.0f, _slimeTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
 
             Core.SpriteBatch.End();
         }
@@ -136,7 +135,7 @@ public class TitleScene : Scene
         _titleScreenButtonsPanel.Dock(Gum.Wireframe.Dock.Fill);
         _titleScreenButtonsPanel.AddToRoot();
 
-        var startButton = new Button();
+        AnimatedButton startButton = new AnimatedButton(_atlas);
         startButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
         startButton.X = 50;
         startButton.Y = -12;
@@ -145,7 +144,7 @@ public class TitleScene : Scene
         startButton.Click += HandleStartClicked;
         _titleScreenButtonsPanel.AddChild(startButton);
 
-        _optionsButton = new Button();
+        _optionsButton = new AnimatedButton(_atlas);
         _optionsButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
         _optionsButton.X = -50;
         _optionsButton.Y = -12;
@@ -179,19 +178,24 @@ public class TitleScene : Scene
         _optionsPanel.IsVisible = false;
         _optionsPanel.AddToRoot();
 
-        var optionsText = new TextRuntime();
+        TextRuntime optionsText = new TextRuntime();
         optionsText.X = 10;
         optionsText.Y = 10;
         optionsText.Text = "OPTIONS";
+        optionsText.UseCustomFont = true;
+        optionsText.FontScale = 0.5f;
+        optionsText.CustomFontFile = @"fonts/04b_30.fnt";
         _optionsPanel.AddChild(optionsText);
 
-        var musicLabel = new Label();
-        musicLabel.Text = "Music";
-        musicLabel.X = 35;
-        musicLabel.Y = 35;
-        _optionsPanel.AddChild(musicLabel);
+        // OptionsSlider musicLabel = new Label();
+        // musicLabel.Text = "Music";
+        // musicLabel.X = 35;
+        // musicLabel.Y = 35;
+        // _optionsPanel.AddChild(musicLabel);
 
-        var musicSlider = new Slider();
+        OptionsSlider musicSlider = new OptionsSlider(_atlas);
+        musicSlider.Name = "MusicSlider";
+        musicSlider.Text = "Music";
         musicSlider.Anchor(Gum.Wireframe.Anchor.Top);
         musicSlider.Y = 30f;
         musicSlider.Minimum = 0;
@@ -203,13 +207,15 @@ public class TitleScene : Scene
         musicSlider.ValueChangeCompleted += HandleMusicSliderValueChangeCompleted;
         _optionsPanel.AddChild(musicSlider);
 
-        var sfxLabel = new Label();
-        sfxLabel.Text = "SFX";
-        sfxLabel.X = 20;
-        sfxLabel.Y = 80;
-        _optionsPanel.AddChild(sfxLabel);
+        // var sfxLabel = new Label();
+        // sfxLabel.Text = "SFX";
+        // sfxLabel.X = 20;
+        // sfxLabel.Y = 80;
+        // _optionsPanel.AddChild(sfxLabel);
 
-        var sfxSlider = new Slider();
+        var sfxSlider = new OptionsSlider(_atlas);
+        sfxSlider.Name = "SfxSlider";
+        sfxSlider.Text = "SFX";
         sfxSlider.Anchor(Gum.Wireframe.Anchor.Top);
         sfxSlider.Y = 93;
         sfxSlider.Minimum = 0;
@@ -221,7 +227,7 @@ public class TitleScene : Scene
         sfxSlider.ValueChangeCompleted += HandleSfxSliderChangeCompleted;
         _optionsPanel.AddChild(sfxSlider);
 
-        _optionsBackButton = new Button();
+        _optionsBackButton = new AnimatedButton(_atlas);
         _optionsBackButton.Text = "BACK";
         _optionsBackButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
         _optionsBackButton.X = -28f;
